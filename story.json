@@ -1,0 +1,41 @@
+{
+  "start": {
+    "description": "You are standing at the edge of a dark cave.",
+    "choices": {
+      "Enter the cave": "cave",
+      "Walk away": "end"
+    }
+  },
+  "cave": {
+    "description": "It's cold and damp. You hear a noise.",
+    "choices": {
+      "Investigate": "investigate",
+      "Run away": "end"
+    }
+  },
+  "investigate": {
+    "description": "You find a treasure chest!",
+    "choices": {
+      "Open the chest": "treasure",
+      "Leave it alone": "end"
+    }
+  },
+  "treasure": {
+    "description": "You found gold and jewels!",
+    "choices": {
+      "Take the treasure": "end",
+      "Leave it": "honest"
+    }
+  },
+  "honest": {
+    "description": "You chose to be honest. You leave the treasure behind.",
+    "choices": {
+      "Go back home": "end",
+      "Explore more": "cave"
+    }
+  },
+  "end": {
+    "description": "Thanks for playing!",
+    "choices": {}
+  }
+}
