@@ -1,5 +1,5 @@
 use std::io::{self, Write};
-use std::{fs, option};
+use std::fs;
 use std::collections::HashMap;
 
 use serde::Deserialize;
