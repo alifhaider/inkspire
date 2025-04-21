@@ -28,6 +28,7 @@ fn main(){
         let scene = &story[&current_scene_key];
         println!("{}", scene.description);
 
+        // keeps track what things you got ["first_collected_thing", "second_collected_thing"]
         if let Some(set) = &scene.set {
             for s in set {
                 variables.insert(s.clone());
@@ -41,10 +42,12 @@ fn main(){
             break;
         }
 
+        // Options for a scene ["first key of choice", "second key of choice"]
         let options: Vec<(&String, &String)> = scene.choices.as_ref().map(|choices| choices.iter().collect()).unwrap_or_default();
         for(index, (choice_text, _target)) in options.iter().enumerate() {
             println!("{}) {}", index + 1, choice_text);
         }
+
 
         if let Some(checks) = &scene.check {
             let mut condition_met = false;
