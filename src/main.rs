@@ -29,6 +29,10 @@ fn main(){
         let scene = &story[&current_scene_key];
         println!("{}", scene.description);
 
+        if current_scene_key == "end" {
+            break;
+        }
+
         // keeps track what things you got ["first_collected_thing", "second_collected_thing"]
         if let Some(set) = &scene.set {
             for s in set {
@@ -81,7 +85,7 @@ fn main(){
             println!("{}) Go Back", options.len() + 1);
         }
 
-        print!(">");
+        print!("> ");
         io::stdout().flush().unwrap();
 
         let mut input = String::new();

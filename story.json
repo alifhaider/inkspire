@@ -47,7 +47,7 @@
   "door_locked": {
     "description": "You have nothing to show. The guard doesn't let you pass.",
     "choices": {
-      "Go back": "start"
+      "Start Again": "start"
     }
   },
   "open_door": {
@@ -58,11 +58,23 @@
     }
   },
   "use_key_again": {
-    "description": "You pull out your spare key and open the door to freedom. Smart move!",
-    "choices": {}
+    "description": "You pull out your spare key and open the door to freedom. Smart move and you won!",
+    "choices": {
+      "Play Again": "start",
+      "End Game": "end"
+    }
   },
   "need_new_key": {
     "description": "You reach for a key... but it's gone. You're stuck again.",
-    "choices": {}
+    "choices": {
+      "Play Again": "start",
+      "End Game": "end"
+    }
+  },
+  "end": {
+    "description": "Thank you for playing! See you next time.",
+    "choices": {
+      "Play Again": "start"
+    }
   }
 }
