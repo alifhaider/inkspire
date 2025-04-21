@@ -1,10 +1,11 @@
-use std::io::{self, stdout, Write};
+use std::io::{ stdout, Write};
 use std::fs;
 use std::collections::HashMap;
 use std::thread::sleep;
 use std::time::Duration;
 use crossterm::{cursor, execute};
 use crossterm::terminal::{Clear, ClearType};
+use crossterm::style::{Color, SetForegroundColor, Stylize};
 use serde::Deserialize;
 
 
@@ -91,13 +92,9 @@ fn main(){
             println!("{}) Go Back", options.len() + 1);
         }
 
-        print!("> ");
-        io::stdout().flush().unwrap();
+        let choice = prompt_input();
 
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Failed to read input");
-
-        let choice_index = match input.trim().parse::<usize>() {
+        let choice_index = match choice.trim().parse::<usize>() {
             Ok(num) if num >= 1 && num <= options.len() + 1 => num - 1,
             _ => {
                 println!("Invalid Choice! Please enter a number between 1 and {}", options.len());
@@ -140,9 +137,20 @@ fn clear_screen() {
 
 fn type_out(txt: &str, delay_ms: u64) {
     for c in txt.chars() {
-        print!("{}", c);
-        stdout().flush().unwrap();
+        print!("{}", c.blue());
+        execute!(
+            stdout(),
+            SetForegroundColor(Color::Blue),
+        ).unwrap();
         sleep(Duration::from_millis(delay_ms));
     }
     println!()
+}
+
+fn prompt_input() -> String {
+    print!("{}", ">> ".green());
+    stdout().flush().unwrap();
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).expect("Failed to read your choice");
+    input.trim().to_string()
 }
