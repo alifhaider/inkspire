@@ -1,31 +1,68 @@
 {
   "start": {
-    "description": "You wake up in a dark dungeon. There's a door ahead and something shiny on the floor.",
+    "description": "You wake up in a dungeon. There's a small pouch on the ground.",
     "choices": {
-      "Pick up the shiny object": "get_key",
+      "Pick up the pouch": "found_keys",
       "Ignore it and go to the door": "go_to_door"
     }
   },
-  "get_key": {
-    "description": "It's a rusty key. You pick it up.",
-    "set": ["has_key"],
+  "found_keys": {
+    "description": "Inside the pouch, you find two identical keys.",
+    "set": ["has_two_keys"],
+    "choices": {
+      "Keep them together": "go_to_door",
+      "Separate the keys": "separate_keys"
+    }
+  },
+  "separate_keys": {
+    "description": "You split the keys and hide one in your boot.",
+    "unset": ["has_two_keys"],
+    "set": ["has_key", "has_spare_key"],
     "choices": {
       "Go to the door": "go_to_door"
     }
   },
   "go_to_door": {
-    "description": "You stand before a large wooden door. It's locked.",
+    "description": "You reach the dungeon door. A guard stops you. \"Do you have a key?\"",
     "check": {
-      "has_key": "open_door",
+      "has_key": "show_key",
+      "has_two_keys": "show_two_keys",
       "else": "door_locked"
     }
   },
-  "open_door": {
-    "description": "You use the key to unlock the door. Light pours in as you step out to freedom. You win!",
-    "choices": {}
+  "show_key": {
+    "description": "You hand the guard a key. He unlocks the door and takes it from you.",
+    "unset": ["has_key"],
+    "choices": {
+      "Go forward": "open_door"
+    }
+  },
+  "show_two_keys": {
+    "description": "You hand the guard both keys. He takes them without a word.",
+    "unset": ["has_two_keys"],
+    "choices": {
+      "Go forward": "open_door"
+    }
   },
   "door_locked": {
-    "description": "The door is locked. You tug at it hopelessly. Maybe you missed something?",
+    "description": "You have nothing to show. The guard doesn't let you pass.",
+    "choices": {
+      "Go back": "start"
+    }
+  },
+  "open_door": {
+    "description": "You enter a bright corridor and find another locked door.",
+    "check": {
+      "has_spare_key": "use_key_again",
+      "else": "need_new_key"
+    }
+  },
+  "use_key_again": {
+    "description": "You pull out your spare key and open the door to freedom. Smart move!",
+    "choices": {}
+  },
+  "need_new_key": {
+    "description": "You reach for a key... but it's gone. You're stuck again.",
     "choices": {}
   }
 }

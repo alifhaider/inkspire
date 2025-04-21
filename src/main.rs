@@ -9,6 +9,7 @@ use serde::Deserialize;
 struct Scene {
     description: String,
     set: Option<Vec<String>>,
+    unset: Option<Vec<String>>,
     choices: Option<HashMap<String, String>>,
     check: Option<HashMap<String, String>>
 }
@@ -32,7 +33,13 @@ fn main(){
         if let Some(set) = &scene.set {
             for s in set {
                 variables.insert(s.clone());
-                println!("variable {}", s.clone())
+            }
+        }
+
+        if let Some(unset) = &scene.unset {
+            for u in unset {
+                variables.remove(&u.clone());
+                println!("removing from variables {}", &u.clone())
             }
         }
 
