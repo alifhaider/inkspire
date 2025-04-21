@@ -1,7 +1,10 @@
-use std::io::{self, Write};
+use std::io::{self, stdout, Write};
 use std::fs;
 use std::collections::HashMap;
-
+use std::thread::sleep;
+use std::time::Duration;
+use crossterm::{cursor, execute};
+use crossterm::terminal::{Clear, ClearType};
 use serde::Deserialize;
 
 
@@ -17,6 +20,10 @@ struct Scene {
 type Story = HashMap<String, Scene>;
 
 fn main(){
+    clear_screen();
+    
+    println!("Welcome to the dungeon...");
+
     let story_data = fs::read_to_string("story.json").expect("Unable to read story file");
     let story: Story = serde_json::from_str(&story_data).expect("Invalid story format");
 
@@ -27,7 +34,7 @@ fn main(){
 
     loop {
         let scene = &story[&current_scene_key];
-        println!("{}", scene.description);
+        type_out(&scene.description, 30);
 
         if current_scene_key == "end" {
             break;
@@ -43,7 +50,6 @@ fn main(){
         if let Some(unset) = &scene.unset {
             for u in unset {
                 variables.remove(&u.clone());
-                println!("removing from variables {}", &u.clone())
             }
         }
 
@@ -121,4 +127,22 @@ fn main(){
 
     }
 
+}
+
+fn clear_screen() {
+    let mut stdout = stdout();
+    execute!(
+        stdout,
+        Clear(ClearType::All),
+        cursor::MoveTo(0, 0)
+    ).unwrap();
+}
+
+fn type_out(txt: &str, delay_ms: u64) {
+    for c in txt.chars() {
+        print!("{}", c);
+        stdout().flush().unwrap();
+        sleep(Duration::from_millis(delay_ms));
+    }
+    println!()
 }
