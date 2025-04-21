@@ -1,41 +1,31 @@
 {
   "start": {
-    "description": "You are standing at the edge of a dark cave.",
+    "description": "You wake up in a dark dungeon. There's a door ahead and something shiny on the floor.",
     "choices": {
-      "Enter the cave": "cave",
-      "Walk away": "end"
+      "Pick up the shiny object": "get_key",
+      "Ignore it and go to the door": "go_to_door"
     }
   },
-  "cave": {
-    "description": "It's cold and damp. You hear a noise.",
+  "get_key": {
+    "description": "It's a rusty key. You pick it up.",
+    "set": ["has_key"],
     "choices": {
-      "Investigate": "investigate",
-      "Run away": "end"
+      "Go to the door": "go_to_door"
     }
   },
-  "investigate": {
-    "description": "You find a treasure chest!",
-    "choices": {
-      "Open the chest": "treasure",
-      "Leave it alone": "end"
+  "go_to_door": {
+    "description": "You stand before a large wooden door. It's locked.",
+    "check": {
+      "has_key": "open_door",
+      "else": "door_locked"
     }
   },
-  "treasure": {
-    "description": "You found gold and jewels!",
-    "choices": {
-      "Take the treasure": "end",
-      "Leave it": "honest"
-    }
+  "open_door": {
+    "description": "You use the key to unlock the door. Light pours in as you step out to freedom. You win!",
+    "choices": {}
   },
-  "honest": {
-    "description": "You chose to be honest. You leave the treasure behind.",
-    "choices": {
-      "Go back home": "end",
-      "Explore more": "cave"
-    }
-  },
-  "end": {
-    "description": "Thanks for playing!",
+  "door_locked": {
+    "description": "The door is locked. You tug at it hopelessly. Maybe you missed something?",
     "choices": {}
   }
 }

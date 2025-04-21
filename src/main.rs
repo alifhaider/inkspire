@@ -8,7 +8,9 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize )]
 struct Scene {
     description: String,
-    choices: HashMap<String, String>
+    set: Option<Vec<String>>,
+    choices: Option<HashMap<String, String>>,
+    check: Option<HashMap<String, String>>
 }
 
 type Story = HashMap<String, Scene>;
@@ -20,19 +22,50 @@ fn main(){
     let mut current_scene_key  = String::from("start");
     let mut history: Vec<String> = Vec::new();
 
+    let mut variables = std::collections::HashSet::<String>::new();
+
     loop {
         let scene = &story[&current_scene_key];
         println!("{}", scene.description);
 
-        if scene.choices.is_empty(){
+        if let Some(set) = &scene.set {
+            for s in set {
+                variables.insert(s.clone());
+                println!("variable {}", s.clone())
+            }
+        }
+
+
+        if scene.choices.as_ref().is_none() && scene.check.as_ref().is_none(){
             println!("The End");
             break;
         }
 
-        let options: Vec<(&String, &String)> = scene.choices.iter().collect();
+        let options: Vec<(&String, &String)> = scene.choices.as_ref().map(|choices| choices.iter().collect()).unwrap_or_default();
         for(index, (choice_text, _target)) in options.iter().enumerate() {
             println!("{}) {}", index + 1, choice_text);
         }
+
+        if let Some(checks) = &scene.check {
+            let mut condition_met = false;
+
+            for (check_key, target) in checks.iter() {
+                if check_key != "else" && variables.contains(check_key) {
+                    current_scene_key = target.clone();
+                    condition_met = true;
+                }
+            }
+            
+
+            if !condition_met {
+                if let Some(else_target) = checks.get("else") {
+                    current_scene_key = else_target.clone();
+                }
+            }
+
+            continue;
+        }
+        
 
         if !history.is_empty() {
             println!("{}) Go Back", options.len() + 1);
