@@ -1,34 +1,33 @@
-use std::io::{ stdout, Write};
-use std::fs;
+use crossterm::style::{Color, SetForegroundColor, Stylize};
+use crossterm::terminal::{Clear, ClearType};
+use crossterm::{cursor, execute};
+use serde::Deserialize;
 use std::collections::HashMap;
+use std::fs;
+use std::io::{Write, stdout};
 use std::thread::sleep;
 use std::time::Duration;
-use crossterm::{cursor, execute};
-use crossterm::terminal::{Clear, ClearType};
-use crossterm::style::{Color, SetForegroundColor, Stylize};
-use serde::Deserialize;
 
-
-#[derive(Debug, Deserialize )]
+#[derive(Debug, Deserialize)]
 struct Scene {
     description: String,
     set: Option<Vec<String>>,
     unset: Option<Vec<String>>,
     choices: Option<HashMap<String, String>>,
-    check: Option<HashMap<String, String>>
+    check: Option<HashMap<String, String>>,
 }
 
 type Story = HashMap<String, Scene>;
 
-fn main(){
+fn main() {
     clear_screen();
-    
+
     println!("Welcome to the dungeon...");
 
     let story_data = fs::read_to_string("story.json").expect("Unable to read story file");
     let story: Story = serde_json::from_str(&story_data).expect("Invalid story format");
 
-    let mut current_scene_key  = String::from("start");
+    let mut current_scene_key = String::from("start");
     let mut history: Vec<String> = Vec::new();
 
     let mut variables = std::collections::HashSet::<String>::new();
@@ -54,18 +53,24 @@ fn main(){
             }
         }
 
-
-        if scene.choices.as_ref().is_none() && scene.check.as_ref().is_none(){
+        if scene.choices.as_ref().is_none() && scene.check.as_ref().is_none() {
             println!("The End");
             break;
         }
 
         // Options for a scene ["first key of choice", "second key of choice"]
-        let options: Vec<(&String, &String)> = scene.choices.as_ref().map(|choices| choices.iter().collect()).unwrap_or_default();
-        for(index, (choice_text, _target)) in options.iter().enumerate() {
-            println!("{}) {}", index + 1, choice_text);
-        }
+        let options: Vec<(&String, &String)> = scene
+            .choices
+            .as_ref()
+            .map(|choices| choices.iter().collect())
+            .unwrap_or_default();
+        for (index, (choice_text, _target)) in options.iter().enumerate() {
+            let mut stdout = stdout();
 
+            execute!(stdout, SetForegroundColor(Color::Yellow)).unwrap();
+            println!("{}) {}", index + 1, choice_text);
+            stdout.flush().unwrap()
+        }
 
         if let Some(checks) = &scene.check {
             let mut condition_met = false;
@@ -76,7 +81,6 @@ fn main(){
                     condition_met = true;
                 }
             }
-            
 
             if !condition_met {
                 if let Some(else_target) = checks.get("else") {
@@ -86,7 +90,6 @@ fn main(){
 
             continue;
         }
-        
 
         if !history.is_empty() {
             println!("{}) Go Back", options.len() + 1);
@@ -97,11 +100,13 @@ fn main(){
         let choice_index = match choice.trim().parse::<usize>() {
             Ok(num) if num >= 1 && num <= options.len() + 1 => num - 1,
             _ => {
-                println!("Invalid Choice! Please enter a number between 1 and {}", options.len());
+                println!(
+                    "Invalid Choice! Please enter a number between 1 and {}",
+                    options.len()
+                );
                 continue;
             }
         };
-        
 
         if choice_index == options.len() {
             match history.pop() {
@@ -114,43 +119,38 @@ fn main(){
                     continue;
                 }
             }
-            
         }
 
         history.push(current_scene_key.clone());
 
         let (_choice_text, target_scene_key) = options[choice_index];
         current_scene_key = target_scene_key.clone();
-
     }
-
 }
 
 fn clear_screen() {
     let mut stdout = stdout();
-    execute!(
-        stdout,
-        Clear(ClearType::All),
-        cursor::MoveTo(0, 0)
-    ).unwrap();
+    execute!(stdout, Clear(ClearType::All), cursor::MoveTo(0, 0)).unwrap();
 }
 
 fn type_out(txt: &str, delay_ms: u64) {
+    let mut stdout = stdout();
     for c in txt.chars() {
-        print!("{}", c.blue());
-        execute!(
-            stdout(),
-            SetForegroundColor(Color::Blue),
-        ).unwrap();
+        execute!(stdout, SetForegroundColor(Color::Blue)).unwrap();
+        print!("{}", c);
+        stdout.flush().unwrap();
         sleep(Duration::from_millis(delay_ms));
     }
-    println!()
+    execute!(stdout, SetForegroundColor(Color::Reset)).unwrap();
+    println!();
 }
 
 fn prompt_input() -> String {
     print!("{}", ">> ".green());
     stdout().flush().unwrap();
     let mut input = String::new();
-    std::io::stdin().read_line(&mut input).expect("Failed to read your choice");
+    std::io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read your choice");
     input.trim().to_string()
 }
