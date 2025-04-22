@@ -19,6 +19,11 @@ struct Scene {
 
 type Story = HashMap<String, Scene>;
 
+enum Commands {
+    Restart,
+    Quit,
+}
+
 fn main() {
     clear_screen();
 
@@ -34,7 +39,7 @@ fn main() {
 
     loop {
         let scene = &story[&current_scene_key];
-        type_out(&scene.description, 30);
+        type_out(&scene.description, 30, Color::Blue);
 
         if current_scene_key == "end" {
             break;
@@ -54,7 +59,7 @@ fn main() {
         }
 
         if scene.choices.as_ref().is_none() && scene.check.as_ref().is_none() {
-            println!("The End");
+            type_out("The End", 15, Color::Red);
             break;
         }
 
@@ -65,11 +70,8 @@ fn main() {
             .map(|choices| choices.iter().collect())
             .unwrap_or_default();
         for (index, (choice_text, _target)) in options.iter().enumerate() {
-            let mut stdout = stdout();
-
-            execute!(stdout, SetForegroundColor(Color::Yellow)).unwrap();
-            println!("{}) {}", index + 1, choice_text);
-            stdout.flush().unwrap()
+            let text = format!("{}) {}", index + 1, choice_text);
+            type_out(&text, 5, Color::Yellow);
         }
 
         if let Some(checks) = &scene.check {
@@ -92,10 +94,31 @@ fn main() {
         }
 
         if !history.is_empty() {
-            println!("{}) Go Back", options.len() + 1);
+            let txt = format!("{}) Go Back", options.len() + 1);
+            type_out(&txt, 5, Color::DarkMagenta);
         }
 
         let choice = prompt_input();
+
+        let command = match choice.as_str() {
+            "quit" => Some(Commands::Quit),
+            "restart" => Some(Commands::Restart),
+            _ => None,
+        };
+
+        if let Some(cmd) = command {
+            match cmd {
+                Commands::Quit => {
+                    current_scene_key = String::from("end");
+                }
+                Commands::Restart => {
+                    type_out("Restarting", 40, Color::Cyan);
+                    current_scene_key = String::from("start");
+                    history.clear();
+                    continue;
+                }
+            }
+        }
 
         let choice_index = match choice.trim().parse::<usize>() {
             Ok(num) if num >= 1 && num <= options.len() + 1 => num - 1,
@@ -133,10 +156,10 @@ fn clear_screen() {
     execute!(stdout, Clear(ClearType::All), cursor::MoveTo(0, 0)).unwrap();
 }
 
-fn type_out(txt: &str, delay_ms: u64) {
+fn type_out(txt: &str, delay_ms: u64, color: Color) {
     let mut stdout = stdout();
     for c in txt.chars() {
-        execute!(stdout, SetForegroundColor(Color::Blue)).unwrap();
+        execute!(stdout, SetForegroundColor(color)).unwrap();
         print!("{}", c);
         stdout.flush().unwrap();
         sleep(Duration::from_millis(delay_ms));
